@@ -32,7 +32,7 @@ composer install
 php init
 ```
 
-7. Запускаємо виконання міграці1
+7. Запускаємо виконання міграції
 
 ```bash
 php yii migrate
