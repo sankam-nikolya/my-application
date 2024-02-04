@@ -1,0 +1,65 @@
+<?php
+
+namespace users\models\forms;
+
+use users\models\User;
+use Yii;
+use yii\base\InvalidArgumentException;
+use yii\base\Model;
+
+/**
+ * Verify user email form
+ *
+ * @property string $token
+ */
+class VerifyEmailForm extends Model
+{
+    /**
+     * @var string
+     */
+    public $token;
+
+    /**
+     * @var User
+     */
+    private $_user;
+
+
+    /**
+     * Creates a form model with given token.
+     *
+     * @param string $token
+     * @param array $config name-value pairs that will be used to initialize the object properties
+     * @throws InvalidArgumentException if token is empty or not valid
+     */
+    public function __construct($token, array $config = [])
+    {
+        if (empty($token) || !is_string($token)) {
+            throw new InvalidArgumentException(
+                Yii::t('users', 'Verify email token cannot be blank.')
+            );
+        }
+
+        $this->_user = User::findByVerificationToken($token);
+
+        if (!$this->_user) {
+            throw new InvalidArgumentException(
+                Yii::t('users', 'Wrong verify email token.')
+            );
+        }
+
+        parent::__construct($config);
+    }
+
+    /**
+     * Verify email
+     * @return User|null the saved model or null if saving fails
+     */
+    public function verifyEmail(): ?User
+    {
+        $user = $this->_user;
+        $user->removeEmailVerificationToken();
+        $user->status = User::STATUS_ACTIVE;
+        return $user->save(false) ? $user : null;
+    }
+}

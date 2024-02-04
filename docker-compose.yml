@@ -1,0 +1,74 @@
+version: '3.0'
+
+services:
+  app:
+    user: "${UID}:${GID}"
+    container_name: test-app
+    build: docker/app
+    restart: unless-stopped
+    volumes:
+      - ./:/app
+      - ./docker/app/composer-data:/var/www/.composer
+    depends_on:
+      - mysql
+      - phpmyadmin
+      - mailcatcher
+    environment:
+      PHP_EXTRA_CONFIGURE_ARGS: "--enable-fpm --with-fpm-user=${UID} --with-fpm-group=${GID}"
+    networks:
+      - test-app-network
+
+  nginx:
+    container_name: test-nginx
+    image: nginx:1.19-alpine
+    restart: unless-stopped
+    ports:
+      - 80:80
+    volumes:
+      - ./:/app
+      - ./docker/nginx/vhost.conf:/etc/nginx/conf.d/vhost.conf
+    depends_on:
+      - app
+    networks:
+      - test-app-network
+
+  mailcatcher:
+    container_name: test-mailcatcher
+    image: schickling/mailcatcher:latest
+    restart: unless-stopped
+    ports:
+      - 1080:1080
+    networks:
+      - test-app-network
+
+  mysql:
+    container_name: test-mysql
+    image: mysql:5.7
+    restart: unless-stopped
+    volumes:
+      - ./docker/mysql/data:/var/lib/mysql
+      - ./docker/mysql/conf.d/config.cnf:/etc/mysql/mysql.conf.d/mysqld.cnf
+    ports:
+      - 3306:3306
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+    networks:
+      - test-app-network
+
+  phpmyadmin:
+    container_name: test-phpmyadmin
+    image: phpmyadmin/phpmyadmin:latest
+    restart: unless-stopped
+    environment:
+      - PMA_HOST=mysql
+      - PMA_ARBITRARY=1
+      - PMA_USER=root
+      - PMA_PASSWORD=root
+      - UPLOAD_LIMIT=512M
+    depends_on:
+      - mysql
+    networks:
+      - test-app-network
+
+networks:
+  test-app-network: { }

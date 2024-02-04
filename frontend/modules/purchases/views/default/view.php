@@ -1,0 +1,57 @@
+<?php
+
+use purchases\models\Purchase;
+use yii\grid\GridView;
+use yii\helpers\Html;
+use yii\widgets\DetailView;
+
+/** @var yii\web\View $this */
+/** @var purchases\models\Purchase $model */
+/** @var purchases\models\searches\PurchaseNomenclatureSearch $searchModel */
+/** @var yii\data\ActiveDataProvider $dataProvider */
+
+$this->title = $model->name;
+$this->params['breadcrumbs'][] = [
+    'label' => Yii::t('purchases', 'Purchases'),
+    'url' => ['index'],
+];
+$this->params['breadcrumbs'][] = $this->title;
+
+?>
+<div class="purchase-view">
+
+    <h1><?= Html::encode($this->title) ?></h1>
+
+    <p><?= $model->description ?></p>
+
+    <?= DetailView::widget([
+        'model' => $model,
+        'attributes' => [
+            'budget',
+            [
+                'attribute' => 'created_by',
+                'value' => static function (Purchase $model) {
+                    return $model->createdBy->fullName ?? null;
+                },
+                'filter' => false,
+            ],
+            'created_at:datetime',
+            'updated_at:datetime',
+        ],
+    ]) ?>
+
+    <h2><?= Yii::t('purchases', 'Nomenclature') ?></h2>
+
+    <?= GridView::widget([
+        'dataProvider' => $dataProvider,
+        'filterModel' => $searchModel,
+        'columns' => [
+            ['class' => 'yii\grid\SerialColumn'],
+
+            'description',
+            'qty',
+            'units',
+        ],
+    ]) ?>
+
+</div>
