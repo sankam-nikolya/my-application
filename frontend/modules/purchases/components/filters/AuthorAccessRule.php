@@ -22,20 +22,28 @@ class AuthorAccessRule extends AccessRule
         if ($parentRes !== true) {
             return $parentRes;
         }
-        return ($this->getAuthorId($request) === $user->id);
+
+        return $this->isValidAuthor($request, $user);
     }
 
     /**
      * Return Author ID
      * @param $request
-     * @return null
+     * @param $user
+     * @return bool
      */
-    private function getAuthorId($request)
+    private function isValidAuthor($request, $user): bool
     {
         $id = $request->get('id');
+
+        if ($id === null) {
+            return true;
+        }
+
         $purchase = Purchase::find()
             ->byId($id)
             ->one();
-        return $purchase->created_by ?? null;
+
+        return $user->id === ($purchase->created_by ?? null);
     }
 }
