@@ -47,6 +47,9 @@ return [
         'purchases' => [
             'class' => '\frontend\modules\purchases\Module',
         ],
+        'blog' => [
+            'class' => 'frontend\modules\blog\Module',
+        ],
     ],
     'params' => $params,
 ];
