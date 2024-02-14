@@ -32,10 +32,25 @@ class DefaultController extends Controller
         return [
             'access' => [
                 'class' => AccessControl::class,
-                'only' => ['logout', 'signup'],
+                'only' => [
+                    'logout',
+                    'signup',
+                    'login',
+                    'verify-email',
+                    'resend-verification-email',
+                    'request-password-reset',
+                    'reset-password',
+                ],
                 'rules' => [
                     [
-                        'actions' => ['signup', 'login'],
+                        'actions' => [
+                            'signup',
+                            'login',
+                            'verify-email',
+                            'resend-verification-email',
+                            'request-password-reset',
+                            'reset-password',
+                        ],
                         'allow' => true,
                         'roles' => ['?'],
                     ],
