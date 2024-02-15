@@ -46,8 +46,9 @@ services:
     image: mysql:5.7
     restart: unless-stopped
     volumes:
-      - ./docker/mysql/data:/var/lib/mysql
       - ./docker/mysql/conf.d/config.cnf:/etc/mysql/mysql.conf.d/mysqld.cnf
+      - ./docker/mysql/data:/var/lib/mysql:rw
+      - ./docker/mysql/init:/docker-entrypoint-initdb.d:rw
     ports:
       - 3306:3306
     environment:

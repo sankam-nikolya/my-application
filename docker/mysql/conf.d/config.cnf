@@ -15,7 +15,7 @@ skip-character-set-client-handshake
 default_authentication_plugin=mysql_native_password
 
 
-pid-file                = /run/mysqld/mysqld.pid
+pid-file                = /var/lib/mysql/mysqld.pid
 basedir                 = /usr
 datadir                 = /var/lib/mysql
 tmpdir                  = /tmp
@@ -41,3 +41,5 @@ innodb_buffer_pool_instances = 2
 innodb_flush_method = O_DIRECT
 innodb_log_buffer_size = 16M
 innodb_log_file_size=128M
+
+explicit_defaults_for_timestamp = 1

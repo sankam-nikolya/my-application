@@ -8,31 +8,25 @@
 docker compose -f docker-compose.yml
 ```
 
-2. Створюємо БД з назвою 'test-app', кодування 'utf8mb4' або правимо підключення до БД тут '
-
-```bash
-common/config/main-local.php
-```
-
-3. Заходимо в контейнер
+2. Заходимо в контейнер
 
 ```bash
 docker exec -it test-app /bin/bash
 ```
 
-4. Встановлюємо залежності
+3. Встановлюємо залежності
 
 ```bash
 composer install
 ```
 
-5. Копіюємо файли конфігів
+4. Копіюємо файли конфігів
 
 ```bash
 php init
 ```
 
-7. Запускаємо виконання міграції
+5. Запускаємо виконання міграцій
 
 ```bash
 php yii migrate
