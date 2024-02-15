@@ -2,7 +2,7 @@ version: '3.0'
 
 services:
   app:
-    user: "1000:1001"
+    user: "${UID}:${GID}"
     container_name: test-app
     build: docker/app
     restart: unless-stopped
