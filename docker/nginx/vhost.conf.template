@@ -1,0 +1,67 @@
+## PHP-FPM Servers ##
+upstream php-fpm {
+    server app:9000;
+}
+
+## FRONTEND ##
+server {
+    listen 80;
+
+    root /app/frontend/web;
+    index index.php index.html;
+
+    server_name ${BASE_HOST}.localhost;
+
+    charset utf-8;
+
+    access_log  /app/frontend/runtime/access.log main;
+    error_log   /app/frontend/runtime/error.log debug;
+
+    location / {
+        try_files $uri $uri/ /index.php?$args;
+    }
+
+    client_max_body_size 32m;
+
+    location ~ \.php$ {
+        fastcgi_split_path_info ^(.+\.php)(/.+)$;
+        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+        fastcgi_pass php-fpm;
+        fastcgi_index index.php;
+        include fastcgi_params;
+    }
+}
+
+## PHPMYADMIN ##
+server {
+    listen 80;
+
+    server_name pma.${BASE_HOST}.localhost;
+
+    charset utf-8;
+
+    location / {
+        proxy_pass http://phpmyadmin;
+    }
+}
+
+## MAILCATCHER ##
+server {
+    listen 80;
+
+    server_name mail.${BASE_HOST}.localhost;
+
+    charset utf-8;
+
+    location / {
+        proxy_pass http://mailcatcher:1080;
+    }
+}
+
+## MISC ##
+### WWW Redirect ###
+server {
+    listen       80;
+    server_name  www.${BASE_HOST}.localhost;
+    return       301 http://${BASE_HOST}.localhost$request_uri;
+}

@@ -60,10 +60,16 @@ RUN docker-php-ext-install zip intl mbstring pdo_mysql exif \
     && docker-php-ext-install ftp \
     && docker-php-ext-enable imagick
 
-
+# Copy install-composer
 COPY ./install-composer.sh /
+RUN chmod +x /install-composer.sh
+
 COPY ./php.ini /usr/local/etc/php/
 COPY ./www.conf /usr/local/etc/php/
+
+# Copy entrypoint script
+COPY ./entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
 
 RUN apt-get purge -y g++ \
     && apt-get autoremove -y \
@@ -77,6 +83,7 @@ RUN apt-get purge -y g++ \
 # Install Yii framework bash autocompletion
 RUN curl -L https://raw.githubusercontent.com/yiisoft/yii2/master/contrib/completion/bash/yii \
         -o /etc/bash_completion.d/yii
+
 
 ## Setup time zone Europe/Kiev
 RUN rm -rf /etc/localtime
@@ -93,3 +100,5 @@ WORKDIR /app
 
 EXPOSE 9000
 CMD ["php-fpm"]
+
+ENTRYPOINT ["/entrypoint.sh"]
