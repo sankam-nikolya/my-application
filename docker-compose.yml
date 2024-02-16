@@ -14,6 +14,9 @@ services:
         condition: service_healthy
     environment:
       PHP_EXTRA_CONFIGURE_ARGS: "--enable-fpm --with-fpm-user=${UID} --with-fpm-group=${GID}"
+      TIME_ZONE: ${TIME_ZONE}
+      UID: ${UID}
+      GID: ${GID}
     networks:
       - app-network
 
@@ -44,6 +47,7 @@ services:
       - app-network
 
   mysql:
+    user: "${UID}:${GID}"
     container_name: ${APP_NAME}-mysql
     image: mysql:5.7
     restart: unless-stopped

@@ -1,12 +1,12 @@
 FROM php:7.4-fpm
 
-# Install modules
-RUN apt-get update && \
-    apt-get -y install \
-        gnupg2 && \
-    apt-key update && \
-    apt-get update && \
-    apt-get install -y \
+ARG TIME_ZONE
+ARG UID
+ARG GID
+
+# Install required packages
+RUN apt-get update && apt-get install -y \
+        gnupg2 \
         libfreetype6-dev \
         libjpeg62-turbo-dev \
         libicu-dev \
@@ -15,10 +15,6 @@ RUN apt-get update && \
         curl \
         imagemagick \
         libcurl3-dev \
-        libicu-dev \
-        libfreetype6-dev \
-        libjpeg-dev \
-        libjpeg62-turbo-dev \
         libonig-dev \
         libmagickwand-dev \
         libpq-dev \
@@ -38,26 +34,32 @@ RUN apt-get update && \
         libmcrypt-dev \
         librabbitmq-dev \
         libssh-dev \
-            --no-install-recommends \
-        libfreetype6-dev \
-        libjpeg62-turbo-dev \
-        libpng-dev
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
-RUN pecl install mcrypt-1.0.3 \
-      imagick
+# Install Xdebug compatible with PHP 7.4
+RUN pecl install xdebug-2.9.8 \
+    && docker-php-ext-enable xdebug
 
-RUN docker-php-ext-install zip intl mbstring pdo_mysql exif \
+# Install PHP extensions
+RUN pecl install mcrypt-1.0.3 imagick \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
-    && docker-php-ext-install gd \
-    && docker-php-ext-install gmp \
-    && docker-php-ext-install bz2 \
-    && docker-php-ext-install mysqli \
-    && docker-php-ext-install pcntl \
-    && docker-php-ext-install soap \
-    && docker-php-ext-install sockets \
-    && docker-php-ext-install bcmath \
-    && docker-php-ext-install calendar \
-    && docker-php-ext-install ftp \
+    && docker-php-ext-install -j$(nproc) \
+        zip \
+        intl \
+        mbstring \
+        pdo_mysql \
+        exif \
+        gd \
+        gmp \
+        bz2 \
+        mysqli \
+        pcntl \
+        soap \
+        sockets \
+        bcmath \
+        calendar \
+        ftp \
     && docker-php-ext-enable imagick
 
 # Copy install-composer
@@ -71,34 +73,16 @@ COPY ./www.conf /usr/local/etc/php/
 COPY ./entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
-RUN apt-get purge -y g++ \
-    && apt-get autoremove -y \
-    && apt-get clean \
-    && rm -r /var/lib/apt/lists/* \
-    && rm -rf /tmp/* \
-    && rm -rf /var/tmp/* \
-    && sh /install-composer.sh \
-    && rm /install-composer.sh
-
 # Install Yii framework bash autocompletion
-RUN curl -L https://raw.githubusercontent.com/yiisoft/yii2/master/contrib/completion/bash/yii \
-        -o /etc/bash_completion.d/yii
+RUN curl -L https://raw.githubusercontent.com/yiisoft/yii2/master/contrib/completion/bash/yii -o /etc/bash_completion.d/yii
 
-
-## Setup time zone Europe/Kiev
-RUN rm -rf /etc/localtime
-RUN ln -s /usr/share/zoneinfo/Europe/Kiev /etc/localtime
-
-ENV UID 1000
-ENV GID www-data
-
-RUN chmod 777 -R /var/www/
-RUN usermod -u $UID $GID
+# Set up time zone
+RUN ln -snf /usr/share/zoneinfo/$TIME_ZONE /etc/localtime && echo $TIME_ZONE > /etc/timezone
 
 VOLUME /var/www/.composer
 WORKDIR /app
 
 EXPOSE 9000
-CMD ["php-fpm"]
 
+CMD ["php-fpm"]
 ENTRYPOINT ["/entrypoint.sh"]
